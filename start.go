@@ -1,6 +1,6 @@
 package main
 
 func handleStartCommand() {
-  config := readConfig()
+  config := getConfig()
   pullRepositories(config)
 }

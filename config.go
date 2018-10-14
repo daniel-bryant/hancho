@@ -8,27 +8,55 @@ import (
 )
 
 type Config struct {
-  Version int
-  Services []struct {
-    Name string
-    Language string
-    Protocol string
-    Giturl string
-  }
+  Services map[string]ServiceConfig
 }
 
-func readConfig() (*Config) {
-  config := Config{}
+type ServiceConfig struct {
+  Language string
+  Protocol string
+  Giturl string
+  Localpath string
+}
 
-  data, err := ioutil.ReadFile("config.yml")
+func getConfig() (*Config) {
+  type ProjectConfig struct {
+    Services map[string]struct {
+      Language string
+      Protocol string
+      Giturl string
+    }
+  }
+
+  type LocalConfig struct {
+    Services map[string]struct {
+      Localpath string
+    }
+  }
+
+  projectConfig := ProjectConfig{}
+  localConfig := LocalConfig{}
+
+  readConfig("config.yml", &projectConfig)
+  readConfig(".config.local.yml", &localConfig)
+
+  services := make(map[string]ServiceConfig)
+  for name, sc := range projectConfig.Services {
+    localpath := localConfig.Services[name].Localpath
+    services[name] = ServiceConfig{sc.Language, sc.Protocol, sc.Giturl, localpath}
+  }
+
+  config := Config{services}
+  return &config
+}
+
+func readConfig(filename string, out interface{}) {
+  data, err := ioutil.ReadFile(filename)
   if err != nil {
     log.Fatal(err)
   }
 
-  err = yaml.Unmarshal(data, &config)
+  err = yaml.Unmarshal(data, out)
   if err != nil {
     log.Fatalf("error: %v", err)
   }
-
-  return &config
 }
