@@ -15,8 +15,10 @@ With <command> being one of the following:
   help, h    Show help`
 
   switch command {
-  case "start", "s", "":
+  case "start", "s", "up", "":
     handleStartCommand()
+  case "stop", "down":
+    handleStopCommand()
   case "help", "h":
     fmt.Println(usage)
   default:
