@@ -3,14 +3,17 @@ package main
 import (
   "fmt"
   "os"
+  "path/filepath"
 
   "gopkg.in/src-d/go-git.v4"
 )
 
 func pullRepositories(config *Config) {
+  os.Mkdir(".hancho", os.ModePerm)
+
   for name, service := range config.Services {
     fmt.Printf("\nService: %s - %s\n", name, service.Giturl)
-    pullRepository(name, service.Giturl)
+    pullRepository(filepath.Join(".hancho", name), service.Giturl)
   }
 }
 

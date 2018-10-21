@@ -5,15 +5,23 @@ import (
 )
 
 func startServices(config *Config) {
-  for _, service := range config.Services {
-    composeFilepath := filepath.Join(service.Localpath, "docker-compose.yml")
-    execCommand("docker-compose", "--file", composeFilepath, "up", "--detach")
+  for name, service := range config.Services {
+    execCommand("docker-compose", "--file", composeFilepath(name, service), "up", "--detach")
   }
 }
 
 func stopServices(config *Config) {
-  for _, service := range config.Services {
-    composeFilepath := filepath.Join(service.Localpath, "docker-compose.yml")
-    execCommand("docker-compose", "--file", composeFilepath, "down")
+  for name, service := range config.Services {
+    execCommand("docker-compose", "--file", composeFilepath(name, service), "down")
   }
+}
+
+func composeFilepath(name string, service ServiceConfig) (string) {
+  const composefile = "docker-compose.yml"
+
+  if len(service.Localpath) != 0 {
+    return filepath.Join(service.Localpath, composefile)
+  }
+
+  return filepath.Join(".hancho", name, composefile)
 }
