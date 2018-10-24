@@ -3,6 +3,7 @@ package main
 import (
   "log"
   "io/ioutil"
+  "strconv"
 
   "gopkg.in/yaml.v2"
 )
@@ -16,6 +17,7 @@ type ServiceConfig struct {
   Protocol string
   Giturl string
   Localpath string
+  Port string
 }
 
 func getConfig() (*Config) {
@@ -39,10 +41,14 @@ func getConfig() (*Config) {
   readConfig("config.yml", &projectConfig)
   readConfig(".config.local.yml", &localConfig)
 
+  var nextPort = 5000
   services := make(map[string]ServiceConfig)
   for name, sc := range projectConfig.Services {
     localpath := localConfig.Services[name].Localpath
-    services[name] = ServiceConfig{sc.Language, sc.Protocol, sc.Giturl, localpath}
+    port := strconv.Itoa(nextPort)
+    nextPort += 1
+
+    services[name] = ServiceConfig{sc.Language, sc.Protocol, sc.Giturl, localpath, port}
   }
 
   config := Config{services}
