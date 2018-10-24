@@ -6,13 +6,17 @@ import (
 
 func startServices(config *Config) {
   for name, service := range config.Services {
-    execCommand("docker-compose", "--file", composeFilepath(name, service), "up", "--detach")
+    fp := composeFilepath(name, service)
+    cmd := progressCommand("docker-compose", "--file", fp, "up", "--detach")
+    cmd.Wait()
   }
 }
 
 func stopServices(config *Config) {
   for name, service := range config.Services {
-    execCommand("docker-compose", "--file", composeFilepath(name, service), "down")
+    fp := composeFilepath(name, service)
+    cmd := progressCommand("docker-compose", "--file", fp, "down")
+    cmd.Wait()
   }
 }
 

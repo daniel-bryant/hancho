@@ -9,11 +9,22 @@ import (
 )
 
 // https://blog.kowalczyk.info/article/wOYk/advanced-command-execution-in-go-with-osexec.html
-func execCommand(name string, arg ...string) {
+type ProgressCmd struct {
+  cmd *exec.Cmd
+}
+
+func progressCommand(name string, arg ...string) *ProgressCmd {
   checkCommand(name)
 
-  var stdoutBuf, stderrBuf bytes.Buffer
   cmd := exec.Command(name, arg...)
+  pCmd := ProgressCmd{cmd}
+
+  return &pCmd
+}
+
+func (p ProgressCmd) Wait() {
+  var stdoutBuf, stderrBuf bytes.Buffer
+  cmd := p.cmd
 
   stdoutIn, _ := cmd.StdoutPipe()
   stderrIn, _ := cmd.StderrPipe()
