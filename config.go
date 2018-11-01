@@ -1,61 +1,70 @@
 package main
 
 import (
-  "log"
   "io/ioutil"
-  "strconv"
+  "log"
 
   "gopkg.in/yaml.v2"
 )
 
 type Config struct {
-  Services map[string]ServiceConfig
+  Services []Service
 }
 
-type ServiceConfig struct {
-  Language string
-  Protocol string
-  Giturl string
-  Localpath string
+type Service struct {
+  Name string
+  ServiceSettings
+}
+
+type ConfigFile struct {
+  Services map[string] ServiceSettings
+}
+
+type ServiceSettings struct {
   Port string
+  GitUrl string
+  LocalPath string
 }
 
-func getConfig() (*Config) {
-  type ProjectConfig struct {
-    Services map[string]struct {
-      Language string
-      Protocol string
-      Giturl string
+func Configuration() (*Config) {
+  configFile := ConfigFile{}
+  localConfigFile := ConfigFile{}
+
+  unmarshalConfig("config.yml", &configFile)
+  unmarshalConfig(".config.yml", &localConfigFile)
+
+  for name, localSettings := range localConfigFile.Services {
+    if remoteSettings, exists := configFile.Services[name]; exists {
+      port := remoteSettings.Port
+      if len(localSettings.Port) != 0 {
+        port = localSettings.Port
+      }
+
+      gitUrl := remoteSettings.GitUrl
+      if len(localSettings.GitUrl) != 0 {
+        gitUrl = localSettings.GitUrl
+      }
+
+      localPath := remoteSettings.LocalPath
+      if len(localSettings.LocalPath) != 0 {
+        localPath = localSettings.LocalPath
+      }
+
+      configFile.Services[name] = ServiceSettings{port, gitUrl, localPath}
+    } else {
+      configFile.Services[name] = localSettings
     }
   }
 
-  type LocalConfig struct {
-    Services map[string]struct {
-      Localpath string
-    }
+  var services []Service
+  for name, serviceSettings := range configFile.Services {
+    services = append(services, Service{name, serviceSettings})
   }
 
-  projectConfig := ProjectConfig{}
-  localConfig := LocalConfig{}
-
-  readConfig("config.yml", &projectConfig)
-  readConfig(".config.local.yml", &localConfig)
-
-  var nextPort = 5000
-  services := make(map[string]ServiceConfig)
-  for name, sc := range projectConfig.Services {
-    localpath := localConfig.Services[name].Localpath
-    port := strconv.Itoa(nextPort)
-    nextPort += 1
-
-    services[name] = ServiceConfig{sc.Language, sc.Protocol, sc.Giturl, localpath, port}
-  }
-
-  config := Config{services}
-  return &config
+  return &Config{services}
 }
 
-func readConfig(filename string, out interface{}) {
+func unmarshalConfig(filename string, out *ConfigFile) {
   data, err := ioutil.ReadFile(filename)
   if err != nil {
     log.Fatal(err)

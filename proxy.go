@@ -31,8 +31,8 @@ func startProxyServer(config *Config) {
   writeConf(f, t, NginxConf{a})
 
   t = template.Must(template.New("server.conf").Parse(serverTemplate))
-  for name, service := range config.Services {
-    host := name + ".hancho.localhost"
+  for _, service := range config.Services {
+    host := service.Name + ".hancho.localhost"
     a := abs(logsDir, host + ".access.log")
     f := filepath.Join(serversDir, host + ".conf")
     writeConf(f, t, ServerConf{host, service.Port, a})

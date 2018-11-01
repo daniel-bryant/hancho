@@ -7,7 +7,7 @@ import (
 func handleStartCommand() {
   os.Mkdir(".hancho", os.ModePerm)
 
-  config := getConfig()
+  config := Configuration()
 
   pullRepositories(config)
   startServices(config)
@@ -16,6 +16,5 @@ func handleStartCommand() {
 }
 
 func handleStopCommand() {
-  config := getConfig()
-  stopServices(config)
+  stopServices(Configuration())
 }
