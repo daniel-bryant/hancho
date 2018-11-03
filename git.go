@@ -9,9 +9,10 @@ import (
 )
 
 func pullRepositories(config *Config) {
+  gitDir := createDir(".hancho", "git")
   for _, service := range config.Services {
     fmt.Printf("\nService: %s - %s\n", service.Name, service.GitUrl)
-    pullRepository(filepath.Join(".hancho", service.Name), service.GitUrl)
+    pullRepository(filepath.Join(gitDir, service.Name), service.GitUrl)
   }
 }
 

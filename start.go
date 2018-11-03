@@ -1,12 +1,6 @@
 package main
 
-import (
-  "os"
-)
-
 func handleStartCommand() {
-  os.Mkdir(".hancho", os.ModePerm)
-
   config := Configuration()
 
   pullRepositories(config)
