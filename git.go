@@ -46,3 +46,11 @@ func pullRepository(directory, url string) {
 
     checkError(err)
 }
+
+func createDir(parent, name string) string {
+  dir := filepath.Join(parent, name)
+  err := os.MkdirAll(dir, os.ModePerm)
+  checkError(err)
+
+  return dir
+}

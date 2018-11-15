@@ -5,8 +5,6 @@ func handleStartCommand() {
 
   pullRepositories(config)
   startServices(config)
-  startProxyServer(config)
-  stopServices(config)
 }
 
 func handleStopCommand() {
