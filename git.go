@@ -1,4 +1,4 @@
-package main
+package hancho
 
 import (
   "fmt"

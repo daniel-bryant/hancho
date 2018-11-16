@@ -1,4 +1,4 @@
-package main
+package hancho
 
 import (
   "fmt"
@@ -38,7 +38,7 @@ func printCommands() {
   }
 }
 
-func handleCommand(arg string) {
+func HandleCommand(arg string) {
   helpCommand := Command{[]string{"help", "h"}, handleHelpCommand, "Show help"}
   availableCommands = append(availableCommands, helpCommand)
 

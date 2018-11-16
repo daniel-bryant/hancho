@@ -2,6 +2,8 @@ package main
 
 import (
   "os"
+
+  "github.com/daniel-bryant/hancho"
 )
 
 func main() {
@@ -10,5 +12,5 @@ func main() {
     command = os.Args[1]
   }
 
-  handleCommand(command)
+  hancho.HandleCommand(command)
 }
