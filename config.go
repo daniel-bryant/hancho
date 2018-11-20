@@ -7,18 +7,7 @@ import (
   "gopkg.in/yaml.v2"
 )
 
-type Config struct {
-  Services []Service
-}
-
-type Service struct {
-  Name string
-  ServiceSettings
-}
-
-type ConfigFile struct {
-  Services map[string] ServiceSettings
-}
+type ServiceMap map[string] ServiceSettings
 
 type ServiceSettings struct {
   Port string
@@ -26,15 +15,19 @@ type ServiceSettings struct {
   LocalPath string
 }
 
-func Configuration() (*Config) {
-  configFile := ConfigFile{}
-  localConfigFile := ConfigFile{}
+type Configuration struct {
+  Services ServiceMap
+}
 
-  unmarshalConfig("config.yml", &configFile)
-  unmarshalConfig(".config.yml", &localConfigFile)
+func ReadConfiguration() (*Configuration) {
+  config := Configuration{}
+  localConfig := Configuration{}
 
-  for name, localSettings := range localConfigFile.Services {
-    if remoteSettings, exists := configFile.Services[name]; exists {
+  unmarshalConfig("config.yml", &config)
+  unmarshalConfig(".config.yml", &localConfig)
+
+  for name, localSettings := range localConfig.Services {
+    if remoteSettings, exists := config.Services[name]; exists {
       port := remoteSettings.Port
       if len(localSettings.Port) != 0 {
         port = localSettings.Port
@@ -50,21 +43,16 @@ func Configuration() (*Config) {
         localPath = localSettings.LocalPath
       }
 
-      configFile.Services[name] = ServiceSettings{port, gitUrl, localPath}
+      config.Services[name] = ServiceSettings{port, gitUrl, localPath}
     } else {
-      configFile.Services[name] = localSettings
+      config.Services[name] = localSettings
     }
   }
 
-  var services []Service
-  for name, serviceSettings := range configFile.Services {
-    services = append(services, Service{name, serviceSettings})
-  }
-
-  return &Config{services}
+  return &config
 }
 
-func unmarshalConfig(filename string, out *ConfigFile) {
+func unmarshalConfig(filename string, out *Configuration) {
   data, err := ioutil.ReadFile(filename)
   if err != nil {
     log.Fatal(err)

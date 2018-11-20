@@ -9,12 +9,18 @@ const (
 )
 
 type ProxyManager struct {
-  Services []Service
+  Services ServiceMap
 }
 
-func (p *ProxyManager) AddServices(services []Service, reply *int) error {
+func NewProxyManager() (*ProxyManager) {
+  return &ProxyManager{make(ServiceMap)}
+}
+
+func (p *ProxyManager) AddServices(services ServiceMap, reply *int) error {
   log.Printf("Adding %d services\n", len(services))
-  p.Services = append(p.Services, services...)
+  for name, settings := range services {
+    p.Services[name] = settings
+  }
   *reply = len(services)
   return nil
 }

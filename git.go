@@ -8,11 +8,11 @@ import (
   "gopkg.in/src-d/go-git.v4"
 )
 
-func pullRepositories(config *Config) {
+func pullRepositories(config *Configuration) {
   gitDir := createDir(".hancho", "git")
-  for _, service := range config.Services {
-    fmt.Printf("\nService: %s - %s\n", service.Name, service.GitUrl)
-    pullRepository(filepath.Join(gitDir, service.Name), service.GitUrl)
+  for name, settings := range config.Services {
+    fmt.Printf("\nService: %s - %s\n", name, settings.GitUrl)
+    pullRepository(filepath.Join(gitDir, name), settings.GitUrl)
   }
 }
 

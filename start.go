@@ -6,14 +6,14 @@ import (
 )
 
 func handleStartCommand() {
-  config := Configuration()
+  config := ReadConfiguration()
 
   pullRepositories(config)
   registerProxies(config)
   startServices(config)
 }
 
-func registerProxies(config *Config) {
+func registerProxies(config *Configuration) {
   serverAddress := "localhost"
   client, err := rpc.DialHTTP("tcp", serverAddress + ProxyManagerPort)
   if err != nil {
@@ -30,5 +30,5 @@ func registerProxies(config *Config) {
 }
 
 func handleStopCommand() {
-  stopServices(Configuration())
+  stopServices(ReadConfiguration())
 }

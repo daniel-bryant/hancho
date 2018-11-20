@@ -61,7 +61,7 @@ func (t Transport) RoundTrip(r *http.Request) (*http.Response, error) {
 
 func main() {
   // Create and register a ProxyManager
-  pm := new(hancho.ProxyManager)
+  pm := hancho.NewProxyManager()
   rpc.Register(pm)
   rpc.HandleHTTP()
 
@@ -82,9 +82,9 @@ func main() {
     subdomain := parts[0]
 
     u := notFound.URL
-    for _, s := range pm.Services {
-      if subdomain == s.Name {
-        u = "http://localhost:" + s.Port
+    for name, settings := range pm.Services {
+      if subdomain == name {
+        u = "http://localhost:" + settings.Port
         break
       }
     }
