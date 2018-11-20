@@ -17,10 +17,12 @@ import (
   "net/http"
   "net/http/httptest"
   "net/http/httputil"
+  "net/rpc"
   "net/url"
   "strings"
   "time"
 
+  "github.com/daniel-bryant/hancho"
   "golang.org/x/net/http2"
   "golang.org/x/net/http2/h2c"
 )
@@ -58,8 +60,18 @@ func (t Transport) RoundTrip(r *http.Request) (*http.Response, error) {
 }
 
 func main() {
-  var servers []Server
+  // Create and register a ProxyManager
+  pm := new(hancho.ProxyManager)
+  rpc.Register(pm)
+  rpc.HandleHTTP()
 
+  l, e := net.Listen("tcp", hancho.ProxyManagerPort)
+  if e != nil {
+    log.Fatal("listen error:", e)
+  }
+  go http.Serve(l, nil)
+
+  // Not found server
   notFound := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
     fmt.Fprintln(w, "Service not found.")
   }))
@@ -70,8 +82,8 @@ func main() {
     subdomain := parts[0]
 
     u := notFound.URL
-    for _, s := range servers {
-      if subdomain == s.Subdomain {
+    for _, s := range pm.Services {
+      if subdomain == s.Name {
         u = "http://localhost:" + s.Port
         break
       }
@@ -117,14 +129,6 @@ func main() {
     H2Client:      h2Client,
     H2NoTLSClient: h2NoTLSClient,
   }
-
-  newServers := []Server {
-    {"example_rails", "5000"},
-    {"example_go", "5001"},
-    {"example_rails_api", "5002"},
-    {"greeter", "50051"},
-  }
-  servers = append(servers, newServers...)
 
   proxy := &httputil.ReverseProxy{Director: director, Transport: transport}
   h1Handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
