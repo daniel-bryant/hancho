@@ -11,8 +11,9 @@ import (
 func pullRepositories(config *Configuration) {
   gitDir := createDir(".hancho", "git")
   for name, settings := range config.Services {
-    fmt.Printf("\nService: %s - %s\n", name, settings.GitUrl)
+    fmt.Printf("Service: %s - %s\n", name, settings.GitUrl)
     pullRepository(filepath.Join(gitDir, name), settings.GitUrl)
+    fmt.Println()
   }
 }
 

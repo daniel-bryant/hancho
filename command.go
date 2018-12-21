@@ -14,6 +14,7 @@ type Command struct {
 var availableCommands = []Command{
   {[]string{"up", "u"}, handleStartCommand, "Create and start all docker containers"},
   {[]string{"down", "d"}, handleStopCommand, "Stop and remove all containers"},
+  {[]string{"proxies", "p"}, handleProxiesCommand, "List the ports being proxied"},
 }
 
 func handleHelpCommand() {
