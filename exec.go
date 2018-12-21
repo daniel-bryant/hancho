@@ -26,6 +26,10 @@ func (p ProgressCmd) EnvAppend(name, value string) {
   p.cmd.Env = append(os.Environ(), name + "=" + value)
 }
 
+func (p ProgressCmd) SetDir(dir string) {
+  p.cmd.Dir = dir
+}
+
 func (p ProgressCmd) Wait() {
   var stdoutBuf, stderrBuf bytes.Buffer
   cmd := p.cmd
