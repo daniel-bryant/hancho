@@ -1,11 +1,13 @@
 package hancho
 
 import (
+  "fmt"
   "path/filepath"
 )
 
 func startServices(config *Configuration) {
   for name, settings := range config.Services {
+    fmt.Printf("hancho: Starting service '%s'\n", name)
     fp := composeFilepath(name, settings)
     cmd := progressCommand("docker-compose", "--file", fp, "up", "--detach")
     cmd.EnvAppend("PORT", settings.Port)
@@ -15,6 +17,7 @@ func startServices(config *Configuration) {
 
 func stopServices(config *Configuration) {
   for name, settings := range config.Services {
+    fmt.Printf("hancho: Stopping service '%s'\n", name)
     fp := composeFilepath(name, settings)
     cmd := progressCommand("docker-compose", "--file", fp, "down")
     cmd.EnvAppend("PORT", settings.Port)
