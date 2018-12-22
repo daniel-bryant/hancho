@@ -26,6 +26,12 @@ func pullRepositories(config *Configuration) {
       cmd := progressCommand("git", "clone", "--progress", settings.GitUrl, dir)
       cmd.Wait()
     }
+
+    if len(settings.Branch) != 0 {
+      cmd := progressCommand("git", "checkout", settings.Branch)
+      cmd.SetDir(dir)
+      cmd.Wait()
+    }
   }
 
   fmt.Println()

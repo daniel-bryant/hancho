@@ -12,6 +12,7 @@ type ServiceMap map[string] ServiceSettings
 type ServiceSettings struct {
   Port string
   GitUrl string
+  Branch string
   LocalPath string
 }
 
@@ -38,12 +39,17 @@ func ReadConfiguration() (*Configuration) {
         gitUrl = localSettings.GitUrl
       }
 
+      branch := remoteSettings.Branch
+      if len(localSettings.Branch) != 0 {
+        branch = localSettings.Branch
+      }
+
       localPath := remoteSettings.LocalPath
       if len(localSettings.LocalPath) != 0 {
         localPath = localSettings.LocalPath
       }
 
-      config.Services[name] = ServiceSettings{port, gitUrl, localPath}
+      config.Services[name] = ServiceSettings{port, gitUrl, branch, localPath}
     } else {
       config.Services[name] = localSettings
     }
