@@ -29,5 +29,5 @@ func composeFilepath(name string, settings ServiceSettings) (string) {
     return filepath.Join(settings.LocalPath, composefile)
   }
 
-  return filepath.Join(".hancho", name, composefile)
+  return filepath.Join(".hancho", "git", name, composefile)
 }
