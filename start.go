@@ -58,5 +58,23 @@ func handleProxiesCommand() {
 }
 
 func handleStopCommand() {
-  stopServices(ReadConfiguration())
+  // todo: should save this config somewhere instead of rereading
+  // in case changes were made between starting and stopping services
+  config := ReadConfiguration()
+
+  stopServices(config)
+
+  serverAddress := "localhost"
+  client, err := rpc.DialHTTP("tcp", serverAddress + ProxyManagerPort)
+  if err != nil {
+    log.Fatal("dialing:", err)
+  }
+
+  var reply int
+  err = client.Call("ProxyManager.RemoveServices", config.Services, &reply)
+  if err != nil {
+    log.Fatal("ProxyManager.RemoveServices error:", err)
+  }
+
+  log.Printf("Unregistered %d proxies\n\n", reply)
 }

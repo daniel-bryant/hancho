@@ -29,6 +29,15 @@ func (p *ProxyManager) AddServices(services ServiceMap, reply *int) error {
   return nil
 }
 
+func (p *ProxyManager) RemoveServices(services ServiceMap, reply *int) error {
+  log.Printf("Removing %d services\n", len(services))
+  for name, _ := range services {
+    delete(p.Services, name)
+  }
+  *reply = len(services)
+  return nil
+}
+
 func (p *ProxyManager) GetServices(empty *Empty, reply *ServiceMap) error {
   log.Printf("Returning %d services\n", len(p.Services))
   *reply = p.Services
