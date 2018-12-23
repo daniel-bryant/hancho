@@ -21,7 +21,9 @@ func NewProxyManager() (*ProxyManager) {
 func (p *ProxyManager) AddServices(services ServiceMap, reply *int) error {
   log.Printf("Adding %d services\n", len(services))
   for name, settings := range services {
-    p.Services[name] = settings
+    if len(settings.Port) != 0 {
+      p.Services[name] = settings
+    }
   }
   *reply = len(services)
   return nil

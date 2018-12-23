@@ -10,7 +10,9 @@ func startServices(config *Configuration) {
     fmt.Printf("hancho: Starting service '%s'\n", name)
     fp := composeFilepath(name, settings)
     cmd := progressCommand("docker-compose", "--file", fp, "up", "--detach")
-    cmd.EnvAppend("PORT", settings.Port)
+    if len(settings.Port) != 0 {
+      cmd.EnvAppend("PORT", settings.Port)
+    }
     cmd.Wait()
   }
 }
@@ -20,7 +22,9 @@ func stopServices(config *Configuration) {
     fmt.Printf("hancho: Stopping service '%s'\n", name)
     fp := composeFilepath(name, settings)
     cmd := progressCommand("docker-compose", "--file", fp, "down")
-    cmd.EnvAppend("PORT", settings.Port)
+    if len(settings.Port) != 0 {
+      cmd.EnvAppend("PORT", settings.Port)
+    }
     cmd.Wait()
   }
 }
