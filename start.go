@@ -21,13 +21,14 @@ func registerProxies(config *Configuration) {
     log.Fatal("dialing:", err)
   }
 
-  var reply int
+  var reply ServiceMap
   err = client.Call("ProxyManager.AddServices", config.Services, &reply)
   if err != nil {
     log.Fatal("ProxyManager.AddServices error:", err)
   }
 
-  log.Printf("Registered %d proxies\n\n", reply)
+  config.Services = reply
+  log.Printf("Registered %d proxies\n\n", len(reply))
 }
 
 func handleProxiesCommand() {
@@ -70,11 +71,11 @@ func handleStopCommand() {
     log.Fatal("dialing:", err)
   }
 
-  var reply int
+  var reply ServiceMap
   err = client.Call("ProxyManager.RemoveServices", config.Services, &reply)
   if err != nil {
     log.Fatal("ProxyManager.RemoveServices error:", err)
   }
 
-  log.Printf("Unregistered %d proxies\n\n", reply)
+  log.Printf("Unregistered %d proxies\n\n", len(reply))
 }
