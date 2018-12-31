@@ -17,6 +17,7 @@ type ServiceSettings struct {
 }
 
 type Configuration struct {
+  Name string
   Services ServiceMap
 }
 

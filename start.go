@@ -21,14 +21,17 @@ func registerProxies(config *Configuration) {
     log.Fatal("dialing:", err)
   }
 
-  var reply ServiceMap
-  err = client.Call("ProxyManager.AddServices", config.Services, &reply)
+  var reply Configuration
+  err = client.Call("ProxyManager.AddServices", config, &reply)
   if err != nil {
     log.Fatal("ProxyManager.AddServices error:", err)
   }
 
-  config.Services = reply
-  log.Printf("Registered %d proxies\n\n", len(reply))
+  *config = reply
+  for serviceName, settings := range config.Services {
+    fmt.Printf("%s.%s.localhost proxied to port %s\n", serviceName, config.Name, settings.Port)
+  }
+  fmt.Println()
 }
 
 func handleProxiesCommand() {
@@ -42,19 +45,21 @@ func handleProxiesCommand() {
     log.Fatal("Error:", err)
   }
 
-  var reply ServiceMap
+  var reply ConfigMap
   err = client.Call("ProxyManager.GetServices", &Empty{}, &reply)
   if err != nil {
     log.Fatal("client.Call: ", err)
   }
 
   if len(reply) == 0 {
-    fmt.Println("No services registered")
+    fmt.Println("No projects registered")
     return
   }
 
-  for name, settings := range reply {
-    fmt.Printf("%s is proxied to port %s\n", name, settings.Port)
+  for projectName, config := range reply {
+    for serviceName, settings := range config.Services {
+      fmt.Printf("%s.%s.localhost proxied to port %s\n", serviceName, projectName, settings.Port)
+    }
   }
 }
 
@@ -62,7 +67,6 @@ func handleStopCommand() {
   // todo: should save this config somewhere instead of rereading
   // in case changes were made between starting and stopping services
   config := ReadConfiguration()
-
   stopServices(config)
 
   serverAddress := "localhost"
@@ -71,11 +75,14 @@ func handleStopCommand() {
     log.Fatal("dialing:", err)
   }
 
-  var reply ServiceMap
-  err = client.Call("ProxyManager.RemoveServices", config.Services, &reply)
+  var reply Configuration
+  err = client.Call("ProxyManager.RemoveServices", config.Name, &reply)
   if err != nil {
     log.Fatal("ProxyManager.RemoveServices error:", err)
   }
 
-  log.Printf("Unregistered %d proxies\n\n", len(reply))
+  fmt.Println()
+  for serviceName, settings := range reply.Services {
+    fmt.Printf("Removed %s.%s.localhost proxy to port %s\n", serviceName, reply.Name, settings.Port)
+  }
 }

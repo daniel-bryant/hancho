@@ -79,13 +79,17 @@ func main() {
 
   director := func(r *http.Request) {
     parts := strings.Split(r.Host, ".")
-    subdomain := parts[0]
-
     u := notFound.URL
-    for name, settings := range pm.Services {
-      if subdomain == name {
-        u = "http://localhost:" + settings.Port
-        break
+
+    // example parts array: [dashboard checkr localhost:80]
+    if len(parts) == 3 {
+      serviceName := parts[0]
+      projectName := parts[1]
+      config := pm.Configs[projectName]
+      service := config.Services[serviceName]
+
+      if len(service.Port) != 0 {
+        u = "http://localhost:" + service.Port
       }
     }
 

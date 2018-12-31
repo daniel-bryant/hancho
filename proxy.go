@@ -11,41 +11,49 @@ const (
 )
 
 type Empty struct {}
+type ConfigMap map[string] Configuration
 
 type ProxyManager struct {
-  Services ServiceMap
+  Configs ConfigMap
   NextAvailablePort int
 }
 
 func NewProxyManager() (*ProxyManager) {
-  return &ProxyManager{make(ServiceMap), startingPort}
+  return &ProxyManager{make(ConfigMap), startingPort}
 }
 
-func (p *ProxyManager) AddServices(services ServiceMap, reply *ServiceMap) error {
-  log.Printf("Adding %d services\n", len(services))
-  for name, settings := range services {
+func (p *ProxyManager) AddServices(config Configuration, reply *Configuration) error {
+  for name, settings := range config.Services {
     if len(settings.Port) == 0 {
       settings.Port = strconv.Itoa(p.NextAvailablePort)
+      config.Services[name] = settings
       p.NextAvailablePort += 1
     }
-    services[name] = settings
-    p.Services[name] = settings
   }
-  *reply = services
+  p.Configs[config.Name] = config
+  *reply = config
+
+  for name, settings := range config.Services {
+    log.Printf("%s.%s.localhost proxied to port %s\n", name, config.Name, settings.Port)
+  }
+
   return nil
 }
 
-func (p *ProxyManager) RemoveServices(services ServiceMap, reply *ServiceMap) error {
-  log.Printf("Removing %d services\n", len(services))
-  for name, _ := range services {
-    delete(p.Services, name)
+func (p *ProxyManager) RemoveServices(name string, reply *Configuration) error {
+  *reply = p.Configs[name]
+  delete(p.Configs, name)
+
+  log.Printf("Removed `%s` services\n", name)
+  for serviceName, _ := range reply.Services {
+    log.Printf("Removed %s.%s.localhost", serviceName, name)
   }
-  *reply = services
+
   return nil
 }
 
-func (p *ProxyManager) GetServices(empty *Empty, reply *ServiceMap) error {
-  log.Printf("Returning %d services\n", len(p.Services))
-  *reply = p.Services
+func (p *ProxyManager) GetServices(empty *Empty, reply *ConfigMap) error {
+  log.Printf("Returning %d config(s)\n", len(p.Configs))
+  *reply = p.Configs
   return nil
 }
