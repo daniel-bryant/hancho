@@ -11,24 +11,24 @@ func pullRepositories(config *Configuration) {
 
   for name, settings := range config.Services {
     fmt.Printf("hancho: Updating service '%s'\n", name)
-    dir := filepath.Join(gitDir, name)
 
-    exists := true
-    if _, err := os.Stat(dir); os.IsNotExist(err) {
-      exists = false
+    dir := filepath.Join(gitDir, name)
+    branch := settings.Branch
+    repo := settings.GitUrl
+
+    if len(branch) == 0 {
+      branch = "master"
     }
 
-    if exists {
-      cmd := progressCommand("git", "pull")
-      cmd.SetDir(dir)
+    if _, err := os.Stat(dir); os.IsNotExist(err) {
+      cmd := progressCommand("git", "clone", "--progress", "--single-branch", "--branch", branch, repo, dir)
       cmd.Wait()
     } else {
-      cmd := progressCommand("git", "clone", "--progress", settings.GitUrl, dir)
+      cmd := progressCommand("git", "fetch", "--progress", "origin", branch)
+      cmd.SetDir(dir)
       cmd.Wait()
-    }
 
-    if len(settings.Branch) != 0 {
-      cmd := progressCommand("git", "checkout", settings.Branch)
+      cmd = progressCommand("git", "reset", "--hard", "origin/" + branch)
       cmd.SetDir(dir)
       cmd.Wait()
     }
